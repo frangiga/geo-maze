@@ -90,7 +90,7 @@
     <span>Encuentra el único camino de 1P hasta GC</span>
   </div>
 
-  <canvas id="mazeCanvas" width="392" height="392"></canvas>
+  <canvas id="mazeCanvas" width="385" height="385"></canvas>
 
   <!-- D-Pad para Móvil -->
   <div class="controls-dpad">
@@ -116,50 +116,72 @@
   const canvas = document.getElementById('mazeCanvas');
   const ctx = canvas.getContext('2d');
 
-  // Mapa ampliado x8 (28x28 = 784 casillas) con ÚNICO CAMINO VÁLIDO
-  const grid = [
-    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
-    [1,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,1,0,1,1,1,1,1,0,1],
-    [1,0,0,0,0,1,0,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1],
-    [1,0,1,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1],
-    [1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,1],
-    [1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1,0,1],
-    [1,0,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,1],
-    [1,0,1,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1],
-    [1,0,1,0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0,1],
-    [1,0,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1],
-    [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1],
-    [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
-    [1,0,1,1,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1],
-    [1,0,1,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,1],
-    [1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1],
-    [1,0,1,0,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1],
-    [1,0,1,0,1,0,1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1],
-    [1,0,1,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1],
-    [1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1],
-    [1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1],
-    [1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1],
-    [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,0,0,1,0,1],
-    [1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,0,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0]
-  ];
+  // Rejilla ampliada a 35x35 casillas
+  const cols = 35;
+  const rows = 35;
+  const cellSize = canvas.width / cols; // 11px por casilla
 
-  const cols = 28;
-  const rows = 28;
-  const cellSize = canvas.width / cols; // 14px por casilla
-
+  let grid = [];
   let player = { x: 0, y: 0 };
-  let goal = { x: 27, y: 27 };
+  let goal = { x: cols - 1, y: rows - 1 };
   let gameActive = true;
+
+  // Generador de laberinto perfecto (DFS) con semilla fija
+  function generateMaze() {
+    grid = Array.from({ length: rows }, () => Array(cols).fill(1));
+
+    let seed = 98765;
+    function pseudoRandom() {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    }
+
+    let stack = [];
+    let startCell = { x: 0, y: 0 };
+    grid[0][0] = 0;
+    stack.push(startCell);
+
+    while (stack.length > 0) {
+      let current = stack[stack.length - 1];
+      let neighbors = [];
+
+      let directions = [
+        { dx: 0, dy: -2 }, // Arriba
+        { dx: 0, dy: 2 },  // Abajo
+        { dx: -2, dy: 0 }, // Izquierda
+        { dx: 2, dy: 0 }   // Derecha
+      ];
+
+      for (let dir of directions) {
+        let nx = current.x + dir.dx;
+        let ny = current.y + dir.dy;
+
+        if (nx >= 0 && nx < cols && ny >= 0 && ny < rows && grid[ny][nx] === 1) {
+          neighbors.push({ x: nx, y: ny, dir });
+        }
+      }
+
+      if (neighbors.length > 0) {
+        let chosenIndex = Math.floor(pseudoRandom() * neighbors.length);
+        let chosen = neighbors[chosenIndex];
+
+        grid[current.y + chosen.dir.dy / 2][current.x + chosen.dir.dx / 2] = 0;
+        grid[chosen.y][chosen.x] = 0;
+
+        stack.push({ x: chosen.x, y: chosen.y });
+      } else {
+        stack.pop();
+      }
+    }
+
+    // Apertura asegurada en la salida
+    grid[rows - 1][cols - 1] = 0;
+    grid[rows - 1][cols - 2] = 0;
+  }
 
   function drawMap() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Dibujar paredes y pasillos
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         if (grid[r][c] === 1) {
@@ -172,24 +194,24 @@
       }
     }
 
-    // Meta (Caché "GC")
+    // Meta ("GC")
     ctx.fillStyle = '#ffd700';
     ctx.beginPath();
     ctx.arc((goal.x + 0.5) * cellSize, (goal.y + 0.5) * cellSize, cellSize / 2.2, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 9px Arial';
+    ctx.font = 'bold 7px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('GC', (goal.x + 0.5) * cellSize, (goal.y + 0.5) * cellSize);
 
-    // Jugador (Ficha "1P")
+    // Jugador ("1P")
     ctx.fillStyle = '#00bcd4';
     ctx.beginPath();
     ctx.arc((player.x + 0.5) * cellSize, (player.y + 0.5) * cellSize, cellSize / 2.2, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 9px Arial';
+    ctx.font = 'bold 7px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('1P', (player.x + 0.5) * cellSize, (player.y + 0.5) * cellSize);
@@ -216,7 +238,7 @@
     }
   }
 
-  // Teclado en PC
+  // Teclado PC
   window.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowUp') movePlayer('up');
     if (e.key === 'ArrowDown') movePlayer('down');
@@ -232,6 +254,7 @@
   }
 
   function initGame() {
+    generateMaze();
     player = { x: 0, y: 0 };
     gameActive = true;
     document.getElementById('reward').style.display = 'none';
