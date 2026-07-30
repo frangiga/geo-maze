@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geo-Maze Challenge - fran_giga</title>
+  <style>
+    body {
+      background: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 10px;
+      touch-action: manipulation;
+    }
+    #game-container {
+      max-width: 420px;
+      margin: 0 auto;
+      background: #1e2b1e;
+      padding: 15px;
+      border-radius: 12px;
+      border: 2px solid #2e7d32;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+    }
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-weight: bold;
+      background: #0a140a;
+      padding: 8px 15px;
+      border-radius: 6px;
+    }
+    #timer { color: #ffd700; font-size: 1.2em; }
+    canvas {
+      background: #0d1a0d;
+      border: 2px solid #4caf50;
+      border-radius: 6px;
+      display: block;
+      margin: 0 auto;
+    }
+    /* D-Pad para Táctil/Móviles */
+    .controls-dpad {
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      grid-template-rows: repeat(3, 60px);
+      gap: 5px;
+      justify-content: center;
+      margin-top: 15px;
+    }
+    .btn-dir {
+      background: #2e7d32;
+      color: #fff;
+      border: none;
+      font-size: 1.5em;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+    }
+    .btn-dir:active { background: #4caf50; }
+    .btn-reset {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #ff9800;
+      border: none;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #000;
+    }
+    #reward {
+      display: none;
+      margin-top: 15px;
+      padding: 15px;
+      background: #1b3e1b;
+      border: 2px solid #ffd700;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="game-container">
+  <h2 style="margin-top:0; color:#4caf50;">🧭 Geo-Maze Challenge 🧭</h2>
+  
+  <div class="hud">
+    <span>Llega al caché</span>
+    <span id="timer">03:00</span>
+  </div>
+
+  <canvas id="mazeCanvas" width="360" height="360"></canvas>
+
+  <!-- D-Pad para Móvil -->
+  <div class="controls-dpad">
+    <div></div>
+    <button class="btn-dir" onclick="movePlayer('up')">▲</button>
+    <div></div>
+    <button class="btn-dir" onclick="movePlayer('left')">◄</button>
+    <button class="btn-dir" onclick="movePlayer('down')">▼</button>
+    <button class="btn-dir" onclick="movePlayer('right')">►</button>
+  </div>
+
+  <button class="btn-reset" onclick="initGame()">Reiniciar Partida</button>
+
+  <!-- Premio / Mensaje Final -->
+  <div id="reward">
+    <h3 style="color:#ffd700; margin-top:0; white-space: nowrap;">🎉 ¡¡¡OBJETIVO ALCANZADO!!! 🎉</h3>
+    <p style="margin:5px 0;">Has encontrado el contenedor a tiempo.</p>
+    <p style="font-size:1.2em; color:#4caf50; margin:0;">Clave Certitude: <strong>GEO-MAZE-2026</strong></p>
+  </div>
+</div>
+
+<script>
+  const canvas = document.getElementById('mazeCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // Mapa del laberinto (0: Camino, 1: Muro)
+  const grid = [
+    [0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+    [0, 1, 0, 1, 0, 1, 0, 1, 1, 0],
+    [0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+    [1, 1, 0, 1, 1, 1, 0, 1, 0, 1],
+    [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+    [0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
+    [0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+    [0, 1, 0, 1, 1, 1, 1, 0, 1, 0],
+    [0, 0, 0, 1, 0, 0, 0, 0, 1, 0],
+    [1, 1, 0, 0, 0, 1, 1, 0, 0, 0]
+  ];
+
+  const cols = 10;
+  const rows = 10;
+  const cellSize = canvas.width / cols;
+
+  let player = { x: 0, y: 0 };
+  let goal = { x: 9, y: 9 };
+  let timeLeft = 180; // 3 minutos (180 segundos)
+  let timerId = null;
+  let gameActive = false;
+
+  function drawMap() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (grid[r][c] === 1) {
+          ctx.fillStyle = '#1b5e20'; // Muros
+          ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+        } else {
+          ctx.strokeStyle = '#143314'; // Cuadrícula de camino
+          ctx.strokeRect(c * cellSize, r * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+
+    // Meta (Caché - Círculo Dorado)
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath();
+    ctx.arc((goal.x + 0.5) * cellSize, (goal.y + 0.5) * cellSize, cellSize / 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Jugador (Ficha Azul)
+    ctx.fillStyle = '#00bcd4';
+    ctx.beginPath();
+    ctx.arc((player.x + 0.5) * cellSize, (player.y + 0.5) * cellSize, cellSize / 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function movePlayer(dir) {
+    if (!gameActive) return;
+
+    let newX = player.x;
+    let newY = player.y;
+
+    if (dir === 'up') newY--;
+    if (dir === 'down') newY++;
+    if (dir === 'left') newX--;
+    if (dir === 'right') newX++;
+
+    // Verificar límites y si la casilla no es un muro
+    if (newX >= 0 && newX < cols && newY >= 0 && newY < rows) {
+      if (grid[newY][newX] === 0) {
+        player.x = newX;
+        player.y = newY;
+        drawMap();
+        checkWin();
+      }
+    }
+  }
+
+  // Escuchar teclado para PC
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp') movePlayer('up');
+    if (e.key === 'ArrowDown') movePlayer('down');
+    if (e.key === 'ArrowLeft') movePlayer('left');
+    if (e.key === 'ArrowRight') movePlayer('right');
+  });
+
+  function checkWin() {
+    if (player.x === goal.x && player.y === goal.y) {
+      gameActive = false;
+      clearInterval(timerId);
+      document.getElementById('reward').style.display = 'block';
+    }
+  }
+
+  function updateTimer() {
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+    document.getElementById('timer').innerText = `${minutes}:${seconds}`;
+
+    if (timeLeft <= 0) {
+      gameActive = false;
+      clearInterval(timerId);
+      alert('¡Se ha agotado el tiempo de 3 minutos! Pulsa reiniciar para volver a intentarlo.');
+    }
+    timeLeft--;
+  }
+
+  function initGame() {
+    player = { x: 0, y: 0 };
+    timeLeft = 180;
+    gameActive = true;
+    document.getElementById('reward').style.display = 'none';
+    if (timerId) clearInterval(timerId);
+    timerId = setInterval(updateTimer, 1000);
+    drawMap();
+  }
+
+  initGame();
+</script>
+
+</body>
+</html>
