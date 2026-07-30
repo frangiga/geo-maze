@@ -87,7 +87,7 @@
   <h2 style="margin-top:0; color:#4caf50;">🧭 Geo-Maze Challenge 🧭</h2>
   
   <div class="hud">
-    <span>Encuentra el único camino de 1P hasta GC</span>
+    <span>Mueve 1P hasta GC</span>
   </div>
 
   <canvas id="mazeCanvas" width="385" height="385"></canvas>
@@ -116,7 +116,7 @@
   const canvas = document.getElementById('mazeCanvas');
   const ctx = canvas.getContext('2d');
 
-  // Rejilla ampliada a 35x35 casillas
+  // Rejilla de 35x35 casillas
   const cols = 35;
   const rows = 35;
   const cellSize = canvas.width / cols; // 11px por casilla
@@ -194,27 +194,34 @@
       }
     }
 
+    // Configuración compartida de alineación de texto para el renderizador del canvas
+    ctx.font = 'bold 7px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
     // Meta ("GC")
+    const goalCenterX = (goal.x + 0.5) * cellSize;
+    const goalCenterY = (goal.y + 0.5) * cellSize;
+
     ctx.fillStyle = '#ffd700';
     ctx.beginPath();
-    ctx.arc((goal.x + 0.5) * cellSize, (goal.y + 0.5) * cellSize, cellSize / 2.2, 0, Math.PI * 2);
+    ctx.arc(goalCenterX, goalCenterY, cellSize / 2.2, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#000';
-    ctx.font = 'bold 7px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('GC', (goal.x + 0.5) * cellSize, (goal.y + 0.5) * cellSize);
+
+    ctx.fillStyle = '#000000';
+    ctx.fillText('GC', goalCenterX, goalCenterY + 0.5);
 
     // Jugador ("1P")
+    const playerCenterX = (player.x + 0.5) * cellSize;
+    const playerCenterY = (player.y + 0.5) * cellSize;
+
     ctx.fillStyle = '#00bcd4';
     ctx.beginPath();
-    ctx.arc((player.x + 0.5) * cellSize, (player.y + 0.5) * cellSize, cellSize / 2.2, 0, Math.PI * 2);
+    ctx.arc(playerCenterX, playerCenterY, cellSize / 2.2, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#000';
-    ctx.font = 'bold 7px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('1P', (player.x + 0.5) * cellSize, (player.y + 0.5) * cellSize);
+
+    ctx.fillStyle = '#000000';
+    ctx.fillText('1P', playerCenterX, playerCenterY + 0.5);
   }
 
   function movePlayer(dir) {
