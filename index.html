@@ -15,7 +15,7 @@
       touch-action: manipulation;
     }
     #game-container {
-      max-width: 420px;
+      max-width: 440px;
       margin: 0 auto;
       background: #1e2b1e;
       padding: 15px;
@@ -87,10 +87,10 @@
   <h2 style="margin-top:0; color:#4caf50;">🧭 Geo-Maze Challenge 🧭</h2>
   
   <div class="hud">
-    <span>Lleva la ficha 1P hasta la casilla GC</span>
+    <span>Encuentra el único camino de 1P hasta GC</span>
   </div>
 
-  <canvas id="mazeCanvas" width="360" height="360"></canvas>
+  <canvas id="mazeCanvas" width="392" height="392"></canvas>
 
   <!-- D-Pad para Móvil -->
   <div class="controls-dpad">
@@ -104,7 +104,7 @@
 
   <button class="btn-reset" onclick="initGame()">Reiniciar Posición</button>
 
-  <!-- Mensaje Final Exacto -->
+  <!-- Mensaje Final -->
   <div id="reward">
     <h3 style="color:#ffd700; margin-top:0; white-space: nowrap;">🎉 ¡¡¡ENHORABUENA!!! 🎉</h3>
     <p style="margin:5px 0;">Has conseguido salir del laberinto!</p>
@@ -116,62 +116,80 @@
   const canvas = document.getElementById('mazeCanvas');
   const ctx = canvas.getContext('2d');
 
-  // Mapa del laberinto (0: Camino, 1: Muro)
+  // Mapa ampliado x8 (28x28 = 784 casillas) con ÚNICO CAMINO VÁLIDO
   const grid = [
-    [0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
-    [0, 1, 0, 1, 0, 1, 0, 1, 1, 0],
-    [0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
-    [1, 1, 0, 1, 1, 1, 0, 1, 0, 1],
-    [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-    [0, 1, 1, 1, 0, 1, 1, 1, 1, 0],
-    [0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
-    [0, 1, 0, 1, 1, 1, 1, 0, 1, 0],
-    [0, 0, 0, 1, 0, 0, 0, 0, 1, 0],
-    [1, 1, 0, 0, 0, 1, 1, 0, 0, 0]
+    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1],
+    [1,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,1,0,1,1,1,1,1,0,1],
+    [1,0,0,0,0,1,0,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1],
+    [1,0,1,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1],
+    [1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,1],
+    [1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1,0,1],
+    [1,0,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,1],
+    [1,0,1,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1],
+    [1,0,1,0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0,1],
+    [1,0,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1],
+    [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1],
+    [1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
+    [1,0,1,1,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1],
+    [1,0,1,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,1],
+    [1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1],
+    [1,0,1,0,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1],
+    [1,0,1,0,1,0,1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1],
+    [1,0,1,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1],
+    [1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1],
+    [1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1],
+    [1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1],
+    [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,0,0,1,0,1],
+    [1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0]
   ];
 
-  const cols = 10;
-  const rows = 10;
-  const cellSize = canvas.width / cols;
+  const cols = 28;
+  const rows = 28;
+  const cellSize = canvas.width / cols; // 14px por casilla
 
   let player = { x: 0, y: 0 };
-  let goal = { x: 9, y: 9 };
+  let goal = { x: 27, y: 27 };
   let gameActive = true;
 
   function drawMap() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Dibujar pasillos y muros
+    // Dibujar paredes y pasillos
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         if (grid[r][c] === 1) {
-          ctx.fillStyle = '#1b5e20'; // Muros
+          ctx.fillStyle = '#1b5e20'; // Muro
           ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
         } else {
-          ctx.strokeStyle = '#143314'; // Cuadrícula
+          ctx.strokeStyle = '#143314'; // Pasillo
           ctx.strokeRect(c * cellSize, r * cellSize, cellSize, cellSize);
         }
       }
     }
 
-    // Meta (Caché con texto "GC")
+    // Meta (Caché "GC")
     ctx.fillStyle = '#ffd700';
     ctx.beginPath();
-    ctx.arc((goal.x + 0.5) * cellSize, (goal.y + 0.5) * cellSize, cellSize / 2.4, 0, Math.PI * 2);
+    ctx.arc((goal.x + 0.5) * cellSize, (goal.y + 0.5) * cellSize, cellSize / 2.2, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 14px Arial';
+    ctx.font = 'bold 9px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('GC', (goal.x + 0.5) * cellSize, (goal.y + 0.5) * cellSize);
 
-    // Jugador (Ficha azul con texto "1P")
+    // Jugador (Ficha "1P")
     ctx.fillStyle = '#00bcd4';
     ctx.beginPath();
-    ctx.arc((player.x + 0.5) * cellSize, (player.y + 0.5) * cellSize, cellSize / 2.4, 0, Math.PI * 2);
+    ctx.arc((player.x + 0.5) * cellSize, (player.y + 0.5) * cellSize, cellSize / 2.2, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 14px Arial';
+    ctx.font = 'bold 9px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('1P', (player.x + 0.5) * cellSize, (player.y + 0.5) * cellSize);
@@ -198,7 +216,7 @@
     }
   }
 
-  // Teclado para PC
+  // Teclado en PC
   window.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowUp') movePlayer('up');
     if (e.key === 'ArrowDown') movePlayer('down');
