@@ -25,15 +25,15 @@
     }
     .hud {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
       margin-bottom: 10px;
       font-weight: bold;
       background: #0a140a;
       padding: 8px 15px;
       border-radius: 6px;
+      color: #4caf50;
     }
-    #timer { color: #ffd700; font-size: 1.2em; }
     canvas {
       background: #0d1a0d;
       border: 2px solid #4caf50;
@@ -87,8 +87,7 @@
   <h2 style="margin-top:0; color:#4caf50;">🧭 Geo-Maze Challenge 🧭</h2>
   
   <div class="hud">
-    <span>Llega al caché</span>
-    <span id="timer">03:00</span>
+    <span>Lleva la ficha 1P hasta la casilla GC</span>
   </div>
 
   <canvas id="mazeCanvas" width="360" height="360"></canvas>
@@ -103,13 +102,13 @@
     <button class="btn-dir" onclick="movePlayer('right')">►</button>
   </div>
 
-  <button class="btn-reset" onclick="initGame()">Reiniciar Partida</button>
+  <button class="btn-reset" onclick="initGame()">Reiniciar Posición</button>
 
-  <!-- Premio / Mensaje Final -->
+  <!-- Mensaje Final Exacto -->
   <div id="reward">
-    <h3 style="color:#ffd700; margin-top:0; white-space: nowrap;">🎉 ¡¡¡OBJETIVO ALCANZADO!!! 🎉</h3>
-    <p style="margin:5px 0;">Has encontrado el contenedor a tiempo.</p>
-    <p style="font-size:1.2em; color:#4caf50; margin:0;">Clave Certitude: <strong>GEO-MAZE-2026</strong></p>
+    <h3 style="color:#ffd700; margin-top:0; white-space: nowrap;">🎉 ¡¡¡ENHORABUENA!!! 🎉</h3>
+    <p style="margin:5px 0;">Has conseguido salir del laberinto!</p>
+    <p style="font-size:1.2em; color:#4caf50; margin:5px 0 0 0;">Clave Certitude: <strong>HAY-SALIDA</strong></p>
   </div>
 </div>
 
@@ -137,36 +136,45 @@
 
   let player = { x: 0, y: 0 };
   let goal = { x: 9, y: 9 };
-  let timeLeft = 180; // 3 minutos (180 segundos)
-  let timerId = null;
-  let gameActive = false;
+  let gameActive = true;
 
   function drawMap() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Dibujar pasillos y muros
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         if (grid[r][c] === 1) {
           ctx.fillStyle = '#1b5e20'; // Muros
           ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
         } else {
-          ctx.strokeStyle = '#143314'; // Cuadrícula de camino
+          ctx.strokeStyle = '#143314'; // Cuadrícula
           ctx.strokeRect(c * cellSize, r * cellSize, cellSize, cellSize);
         }
       }
     }
 
-    // Meta (Caché - Círculo Dorado)
+    // Meta (Caché con texto "GC")
     ctx.fillStyle = '#ffd700';
     ctx.beginPath();
-    ctx.arc((goal.x + 0.5) * cellSize, (goal.y + 0.5) * cellSize, cellSize / 3, 0, Math.PI * 2);
+    ctx.arc((goal.x + 0.5) * cellSize, (goal.y + 0.5) * cellSize, cellSize / 2.4, 0, Math.PI * 2);
     ctx.fill();
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('GC', (goal.x + 0.5) * cellSize, (goal.y + 0.5) * cellSize);
 
-    // Jugador (Ficha Azul)
+    // Jugador (Ficha azul con texto "1P")
     ctx.fillStyle = '#00bcd4';
     ctx.beginPath();
-    ctx.arc((player.x + 0.5) * cellSize, (player.y + 0.5) * cellSize, cellSize / 3, 0, Math.PI * 2);
+    ctx.arc((player.x + 0.5) * cellSize, (player.y + 0.5) * cellSize, cellSize / 2.4, 0, Math.PI * 2);
     ctx.fill();
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('1P', (player.x + 0.5) * cellSize, (player.y + 0.5) * cellSize);
   }
 
   function movePlayer(dir) {
@@ -180,7 +188,6 @@
     if (dir === 'left') newX--;
     if (dir === 'right') newX++;
 
-    // Verificar límites y si la casilla no es un muro
     if (newX >= 0 && newX < cols && newY >= 0 && newY < rows) {
       if (grid[newY][newX] === 0) {
         player.x = newX;
@@ -191,7 +198,7 @@
     }
   }
 
-  // Escuchar teclado para PC
+  // Teclado para PC
   window.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowUp') movePlayer('up');
     if (e.key === 'ArrowDown') movePlayer('down');
@@ -202,33 +209,14 @@
   function checkWin() {
     if (player.x === goal.x && player.y === goal.y) {
       gameActive = false;
-      clearInterval(timerId);
       document.getElementById('reward').style.display = 'block';
     }
   }
 
-  function updateTimer() {
-    let minutes = Math.floor(timeLeft / 60);
-    let seconds = timeLeft % 60;
-    minutes = minutes < 10 ? '0' + minutes : minutes;
-    seconds = seconds < 10 ? '0' + seconds : seconds;
-    document.getElementById('timer').innerText = `${minutes}:${seconds}`;
-
-    if (timeLeft <= 0) {
-      gameActive = false;
-      clearInterval(timerId);
-      alert('¡Se ha agotado el tiempo de 3 minutos! Pulsa reiniciar para volver a intentarlo.');
-    }
-    timeLeft--;
-  }
-
   function initGame() {
     player = { x: 0, y: 0 };
-    timeLeft = 180;
     gameActive = true;
     document.getElementById('reward').style.display = 'none';
-    if (timerId) clearInterval(timerId);
-    timerId = setInterval(updateTimer, 1000);
     drawMap();
   }
 
