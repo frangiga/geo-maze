@@ -2,23 +2,27 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Geo-Maze Challenge - fran_giga</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       background: #111;
       color: #fff;
       font-family: Arial, sans-serif;
       text-align: center;
       margin: 0;
-      padding: 10px;
+      padding: 10px 5px;
       touch-action: manipulation;
     }
     #game-container {
-      max-width: 440px;
+      width: 100%;
+      max-width: 420px;
       margin: 0 auto;
       background: #1e2b1e;
-      padding: 15px;
+      padding: 12px;
       border-radius: 12px;
       border: 2px solid #2e7d32;
       box-shadow: 0 4px 15px rgba(0,0,0,0.8);
@@ -40,6 +44,8 @@
       border-radius: 6px;
       display: block;
       margin: 0 auto;
+      max-width: 100%;
+      height: auto;
     }
     /* D-Pad para Táctil/Móviles */
     .controls-dpad {
@@ -84,7 +90,7 @@
 <body>
 
 <div id="game-container">
-  <h2 style="margin-top:0; color:#4caf50;">🧭 Geo-Maze Vicente Mortes 🧭</h2>
+  <h2 style="margin-top:0; color:#4caf50; font-size: 1.4em;">🧭 Geo-Maze Challenge 🧭</h2>
   
   <div class="hud">
     <span>Mueve 1P hasta GC</span>
@@ -263,6 +269,7 @@
   function initGame() {
     generateMaze();
     player = { x: 0, y: 0 };
+    gameActive = false; // Prevención previa de estado
     gameActive = true;
     document.getElementById('reward').style.display = 'none';
     drawMap();
