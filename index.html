@@ -56,6 +56,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      gap: 6px;
       margin-bottom: 6px;
       font-weight: bold;
       background: rgba(10, 20, 10, 0.85);
@@ -65,6 +66,22 @@
       color: #00f2fe;
       font-size: 0.85em;
       box-shadow: inset 0 0 8px rgba(0, 242, 254, 0.15);
+    }
+    /* Iconos de fichas para el HUD */
+    .token-icon {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      vertical-align: middle;
+    }
+    .token-player {
+      background: #00f2fe;
+      box-shadow: 0 0 6px #00f2fe;
+    }
+    .token-goal {
+      background: #ffd700;
+      box-shadow: 0 0 6px #ffd700;
     }
     .canvas-wrapper {
       flex: 1;
@@ -214,8 +231,8 @@
 <div id="game-container">
   <div>
     <h2 class="game-title">🧭 Geo-Maze Vicente Mortes 🧭</h2>
-    <div class="hud">
-      <span id="hud-text">Mueve 1P hasta GC</span>
+    <div class="hud" id="hud-container">
+      <!-- El texto del HUD se genera dinámicamente con iconos de color -->
     </div>
   </div>
 
@@ -271,10 +288,11 @@
 </div>
 
 <script>
-  // Diccionario multilingüe
+  // Diccionario multilingüe con estructura para fichas coloreadas
   const translations = {
     es: {
-      hud: "Mueve 1P hasta GC",
+      moveText: "Mueve",
+      toText: "hasta",
       reset: "Reiniciar Posición",
       winTitle: "🎉 ¡¡¡ENHORABUENA!!! 🎉",
       winDesc: "¡Has conseguido salir del laberinto!",
@@ -282,7 +300,8 @@
       closeBtn: "Cerrar y Rejugar"
     },
     en: {
-      hud: "Move 1P to GC",
+      moveText: "Move",
+      toText: "to",
       reset: "Reset Position",
       winTitle: "🎉 CONGRATULATIONS! 🎉",
       winDesc: "You made it out of the maze!",
@@ -290,7 +309,8 @@
       closeBtn: "Close & Replay"
     },
     fr: {
-      hud: "Déplacez 1P vers GC",
+      moveText: "Déplacez",
+      toText: "vers",
       reset: "Réinitialiser",
       winTitle: "🎉 FÉLICITATIONS ! 🎉",
       winDesc: "Vous êtes sorti du labyrinthe !",
@@ -298,15 +318,17 @@
       closeBtn: "Fermer et Rejouer"
     },
     pt: {
-      hud: "Mova 1P até GC",
+      moveText: "Mova",
+      toText: "até",
       reset: "Reiniciar Posição",
       winTitle: "🎉 PARABÉNS! 🎉",
-      winDesc: "Você conseguiu salir do labirinto!",
+      winDesc: "Você conseguiu sair do labirinto!",
       keyLabel: "Chave Certitude:",
       closeBtn: "Fechar e Jogar Novamente"
     },
     de: {
-      hud: "Bewege 1P zu GC",
+      moveText: "Bewege",
+      toText: "zu",
       reset: "Position Zurücksetzen",
       winTitle: "🎉 HERZLICHEN GLÜCKWUNSCH! 🎉",
       winDesc: "Du hast den Weg aus dem Labyrinth gefunden!",
@@ -314,7 +336,8 @@
       closeBtn: "Schließen & Erneut Spielen"
     },
     it: {
-      hud: "Sposta 1P fino a GC",
+      moveText: "Sposta",
+      toText: "fino a",
       reset: "Ricomincia Posizione",
       winTitle: "🎉 CONGRATULAZIONI! 🎉",
       winDesc: "Sei uscito dal labirinto!",
@@ -329,8 +352,11 @@
     currentLang = lang;
     const t = translations[lang];
 
-    // Actualizar textos
-    document.getElementById('hud-text').textContent = t.hud;
+    // Construir el HUD dinámicamente con los iconos de fichas
+    const hudContainer = document.getElementById('hud-container');
+    hudContainer.innerHTML = `${t.moveText} <span class="token-icon token-player"></span> ${t.toText} <span class="token-icon token-goal"></span>`;
+
+    // Actualizar textos restantes
     document.getElementById('btn-reset-text').textContent = t.reset;
     document.getElementById('win-title').textContent = t.winTitle;
     document.getElementById('win-desc').textContent = t.winDesc;
@@ -424,12 +450,7 @@
       }
     }
 
-    // Configuración de alineación de texto para el canvas
-    ctx.font = 'bold 6px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    // Meta ("GC")
+    // Meta (Ficha dorada limpia sin texto)
     const goalCenterX = (goal.x + 0.5) * cellSize;
     const goalCenterY = (goal.y + 0.5) * cellSize;
 
@@ -438,10 +459,7 @@
     ctx.arc(goalCenterX, goalCenterY, cellSize / 2.2, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = '#000000';
-    ctx.fillText('GC', goalCenterX, goalCenterY + 0.5);
-
-    // Jugador ("1P") con halo cian brillante
+    // Jugador (Ficha cian neón limpia sin texto)
     const playerCenterX = (player.x + 0.5) * cellSize;
     const playerCenterY = (player.y + 0.5) * cellSize;
 
@@ -449,9 +467,6 @@
     ctx.beginPath();
     ctx.arc(playerCenterX, playerCenterY, cellSize / 2.2, 0, Math.PI * 2);
     ctx.fill();
-
-    ctx.fillStyle = '#000000';
-    ctx.fillText('1P', playerCenterX, playerCenterY + 0.5);
   }
 
   function movePlayer(dir) {
