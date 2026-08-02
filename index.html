@@ -3,64 +3,87 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Geo-Maze Challenge - fran_giga</title>
+  <title>Geo-Maze Vicente Mortes - fran_giga</title>
   <style>
     * {
       box-sizing: border-box;
     }
-    body {
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Cero scroll absoluto */
       background: #111;
       color: #fff;
       font-family: Arial, sans-serif;
       text-align: center;
-      margin: 0;
-      padding: 10px 5px;
       touch-action: manipulation;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 5px;
     }
     #game-container {
       width: 100%;
       max-width: 420px;
-      margin: 0 auto;
+      height: 100vh;
+      height: 100dvh; /* Adaptación dinámica a barras de navegadores móviles */
+      max-height: 700px;
       background: #1e2b1e;
-      padding: 12px;
+      padding: 10px;
       border-radius: 12px;
       border: 2px solid #2e7d32;
       box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
     .hud {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
       font-weight: bold;
       background: #0a140a;
-      padding: 8px 15px;
+      padding: 6px 12px;
       border-radius: 6px;
       color: #4caf50;
+      font-size: 0.9em;
+    }
+    .canvas-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0; /* Permite escalar el canvas hacia abajo si falta espacio vertical */
+      margin: 4px 0;
     }
     canvas {
       background: #0d1a0d;
       border: 2px solid #4caf50;
       border-radius: 6px;
-      display: block;
-      margin: 0 auto;
       max-width: 100%;
-      height: auto;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
     }
     /* D-Pad para Táctil/Móviles */
     .controls-dpad {
       display: grid;
-      grid-template-columns: repeat(3, 60px);
-      grid-template-rows: repeat(3, 60px);
-      gap: 5px;
+      grid-template-columns: repeat(3, 50px);
+      grid-template-rows: repeat(3, 50px);
+      gap: 4px;
       justify-content: center;
-      margin-top: 15px;
+      margin-top: 4px;
     }
     .btn-dir {
       background: #2e7d32;
       color: #fff;
       border: none;
-      font-size: 1.5em;
+      font-size: 1.3em;
       border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
@@ -68,53 +91,109 @@
     }
     .btn-dir:active { background: #4caf50; }
     .btn-reset {
-      margin-top: 10px;
-      padding: 10px 20px;
+      margin-top: 6px;
+      padding: 8px 16px;
       background: #ff9800;
       border: none;
       font-weight: bold;
       border-radius: 6px;
       cursor: pointer;
       color: #000;
+      font-size: 0.85em;
     }
-    #reward {
+    /* Pie de página / Firma */
+    .footer-signature {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px solid #2e7d32;
+      font-size: 0.8em;
+    }
+    .footer-signature a {
+      color: #81c784;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.2s;
+    }
+    .footer-signature a:hover,
+    .footer-signature a:active {
+      color: #ffd700;
+      text-decoration: underline;
+    }
+    /* Modal / Pop-up de Victoria */
+    .modal-overlay {
       display: none;
-      margin-top: 15px;
-      padding: 15px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .modal-content {
       background: #1b3e1b;
-      border: 2px solid #ffd700;
-      border-radius: 8px;
+      border: 3px solid #ffd700;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 350px;
+      width: 100%;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      animation: popIn 0.3s ease-out;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
 <body>
 
 <div id="game-container">
-  <h2 style="margin-top:0; color:#4caf50; font-size: 1.4em;">🧭 Geo-Maze Challenge 🧭</h2>
-  
-  <div class="hud">
-    <span>Mueve 1P hasta GC</span>
+  <div>
+    <h2 style="margin: 0 0 6px 0; color:#4caf50; font-size: 1.2em;">🧭 Geo-Maze Vicente Mortes 🧭</h2>
+    <div class="hud">
+      <span>Mueve 1P hasta GC</span>
+    </div>
   </div>
 
-  <canvas id="mazeCanvas" width="385" height="385"></canvas>
-
-  <!-- D-Pad para Móvil -->
-  <div class="controls-dpad">
-    <div></div>
-    <button class="btn-dir" onclick="movePlayer('up')">▲</button>
-    <div></div>
-    <button class="btn-dir" onclick="movePlayer('left')">◄</button>
-    <button class="btn-dir" onclick="movePlayer('down')">▼</button>
-    <button class="btn-dir" onclick="movePlayer('right')">►</button>
+  <div class="canvas-wrapper">
+    <canvas id="mazeCanvas" width="385" height="385"></canvas>
   </div>
 
-  <button class="btn-reset" onclick="initGame()">Reiniciar Posición</button>
+  <div>
+    <!-- D-Pad para Móvil -->
+    <div class="controls-dpad">
+      <div></div>
+      <button class="btn-dir" onclick="movePlayer('up')">▲</button>
+      <div></div>
+      <button class="btn-dir" onclick="movePlayer('left')">◄</button>
+      <button class="btn-dir" onclick="movePlayer('down')">▼</button>
+      <button class="btn-dir" onclick="movePlayer('right')">►</button>
+    </div>
 
-  <!-- Mensaje Final -->
-  <div id="reward">
-    <h3 style="color:#ffd700; margin-top:0; white-space: nowrap;">🎉 ¡¡¡ENHORABUENA!!! 🎉</h3>
-    <p style="margin:5px 0;">Has conseguido salir del laberinto!</p>
-    <p style="font-size:1.2em; color:#4caf50; margin:5px 0 0 0;">Clave Certitude: <strong>HAY-SALIDA</strong></p>
+    <button class="btn-reset" onclick="initGame()">Reiniciar Posición</button>
+
+    <!-- Firma a pie de página -->
+    <div class="footer-signature">
+      <a href="https://www.geocaching.com/plan/lists/BMFC2Z7" target="_blank" rel="noopener">GeoPaterna</a>
+      <a href="https://www.geocaching.com/p/?guid=8aa34b6e-769c-42e2-ab66-4163f9a40e13&amp;wid=9b106a24-4eef-41ab-8a06-c207d4143cb1&amp;ds=2" target="_blank" rel="noopener">fran_giga</a>
+    </div>
+  </div>
+</div>
+
+<!-- Ventana Emergente (Modal) -->
+<div id="rewardModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="color:#ffd700; margin-top:0; font-size: 1.4em;">🎉 ¡¡¡ENHORABUENA!!! 🎉</h3>
+    <p style="margin:10px 0;">¡Has conseguido salir del laberinto!</p>
+    <p style="font-size:1.1em; color:#4caf50; margin:10px 0;">Clave Certitude:<br><strong style="font-size:1.3em; color:#fff;">HAY-SALIDA</strong></p>
+    <button class="btn-reset" style="margin-top:15px; width:100%; font-size:1em;" onclick="closeModal()">Cerrar y Rejugar</button>
   </div>
 </div>
 
@@ -122,10 +201,10 @@
   const canvas = document.getElementById('mazeCanvas');
   const ctx = canvas.getContext('2d');
 
-  // Rejilla de 35x35 casillas
-  const cols = 35;
-  const rows = 35;
-  const cellSize = canvas.width / cols; // 11px por casilla
+  // Rejilla de 45x45 casillas
+  const cols = 45;
+  const rows = 45;
+  const cellSize = canvas.width / cols;
 
   let grid = [];
   let player = { x: 0, y: 0 };
@@ -200,8 +279,8 @@
       }
     }
 
-    // Configuración compartida de alineación de texto para el renderizador del canvas
-    ctx.font = 'bold 7px Arial';
+    // Configuración de alineación de texto para el canvas
+    ctx.font = 'bold 6px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
@@ -262,16 +341,20 @@
   function checkWin() {
     if (player.x === goal.x && player.y === goal.y) {
       gameActive = false;
-      document.getElementById('reward').style.display = 'block';
+      document.getElementById('rewardModal').style.display = 'flex';
     }
+  }
+
+  function closeModal() {
+    document.getElementById('rewardModal').style.display = 'none';
+    initGame();
   }
 
   function initGame() {
     generateMaze();
     player = { x: 0, y: 0 };
-    gameActive = false; // Prevención previa de estado
     gameActive = true;
-    document.getElementById('reward').style.display = 'none';
+    document.getElementById('rewardModal').style.display = 'none';
     drawMap();
   }
 
