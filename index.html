@@ -42,8 +42,31 @@
       flex-direction: column;
       justify-content: space-between;
     }
+    /* Barra superior con banderas */
+    .lang-bar {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .flag-btn {
+      background: transparent;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1.2em;
+      padding: 2px 4px;
+      transition: all 0.2s ease;
+      line-height: 1;
+    }
+    .flag-btn:hover, .flag-btn.active {
+      border-color: #00f2fe;
+      transform: scale(1.15);
+      background: rgba(0, 242, 254, 0.15);
+      box-shadow: 0 0 8px rgba(0, 242, 254, 0.4);
+    }
     .game-title {
-      margin: 0 0 6px 0;
+      margin: 0 0 4px 0;
       font-size: 1.25em;
       font-weight: 900;
       background: linear-gradient(90deg, #00f2fe, #4caf50, #ffd700);
@@ -151,9 +174,9 @@
       color: #ffd700;
       text-shadow: 0 0 8px #ffd700;
     }
-    /* Modal / Pop-up de Victoria Brillante */
+    /* Modal / Pop-ups */
     .modal-overlay {
-      display: none;
+      display: flex;
       position: fixed;
       top: 0;
       left: 0;
@@ -176,6 +199,33 @@
       box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), inset 0 0 15px rgba(255, 215, 0, 0.2);
       animation: popIn 0.3s ease-out;
     }
+    .lang-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .lang-choice-btn {
+      background: linear-gradient(145deg, #2e7d32, #1b5e20);
+      color: #fff;
+      border: 1px solid #4caf50;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.95em;
+      transition: all 0.2s;
+    }
+    .lang-choice-btn:hover, .lang-choice-btn:active {
+      background: linear-gradient(145deg, #00f2fe, #0099a8);
+      color: #000;
+      border-color: #00f2fe;
+      box-shadow: 0 0 10px #00f2fe;
+    }
     @keyframes popIn {
       from { transform: scale(0.7); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
@@ -186,9 +236,19 @@
 
 <div id="game-container">
   <div>
+    <!-- Barra superior de idioma -->
+    <div class="lang-bar">
+      <button class="flag-btn" onclick="setLanguage('es')" title="Español">🇪🇸</button>
+      <button class="flag-btn" onclick="setLanguage('en')" title="English">🇬🇧</button>
+      <button class="flag-btn" onclick="setLanguage('fr')" title="Français">🇫🇷</button>
+      <button class="flag-btn" onclick="setLanguage('pt')" title="Português">🇵🇹</button>
+      <button class="flag-btn" onclick="setLanguage('de')" title="Deutsch">🇩🇪</button>
+      <button class="flag-btn" onclick="setLanguage('it')" title="Italiano">🇮🇹</button>
+    </div>
+
     <h2 class="game-title">🧭 Geo-Maze Vicente Mortes 🧭</h2>
     <div class="hud">
-      <span>Mueve 1P hasta GC</span>
+      <span id="hud-text">Mueve 1P hasta GC</span>
     </div>
   </div>
 
@@ -207,7 +267,7 @@
       <button class="btn-dir" onclick="movePlayer('right')">►</button>
     </div>
 
-    <button class="btn-reset" onclick="initGame()">Reiniciar Posición</button>
+    <button id="btn-reset-text" class="btn-reset" onclick="initGame()">Reiniciar Posición</button>
 
     <!-- Firma a pie de página -->
     <div class="footer-signature">
@@ -217,17 +277,114 @@
   </div>
 </div>
 
-<!-- Ventana Emergente (Modal) -->
-<div id="rewardModal" class="modal-overlay">
+<!-- Modal Inicial: Selección de Idioma -->
+<div id="langModal" class="modal-overlay">
   <div class="modal-content">
-    <h3 style="color:#ffd700; margin-top:0; font-size: 1.4em; text-shadow: 0 0 10px rgba(255,215,0,0.5);">🎉 ¡¡¡ENHORABUENA!!! 🎉</h3>
-    <p style="margin:10px 0;">¡Has conseguido salir del laberinto!</p>
-    <p style="font-size:1.1em; color:#00f2fe; margin:10px 0;">Clave Certitude:<br><strong style="font-size:1.4em; color:#fff; text-shadow: 0 0 10px #00f2fe;">HAY-SALIDA</strong></p>
-    <button class="btn-reset" style="margin-top:15px; width:100%; font-size:1em;" onclick="closeModal()">Cerrar y Rejugar</button>
+    <h3 style="color:#ffd700; margin-top:0; font-size: 1.3em;">🌐 Choose Language 🌐</h3>
+    <p style="margin:5px 0; font-size:0.9em; color:#ccc;">Select your language to start:</p>
+    <div class="lang-grid">
+      <button class="lang-choice-btn" onclick="selectInitialLanguage('es')">🇪🇸 Español</button>
+      <button class="lang-choice-btn" onclick="selectInitialLanguage('en')">🇬🇧 English</button>
+      <button class="lang-choice-btn" onclick="selectInitialLanguage('fr')">🇫🇷 Français</button>
+      <button class="lang-choice-btn" onclick="selectInitialLanguage('pt')">🇵🇹 Português</button>
+      <button class="lang-choice-btn" onclick="selectInitialLanguage('de')">🇩🇪 Deutsch</button>
+      <button class="lang-choice-btn" onclick="selectInitialLanguage('it')">🇮🇹 Italiano</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Victoria -->
+<div id="rewardModal" class="modal-overlay" style="display:none;">
+  <div class="modal-content">
+    <h3 id="win-title" style="color:#ffd700; margin-top:0; font-size: 1.4em; text-shadow: 0 0 10px rgba(255,215,0,0.5);">🎉 ¡¡¡ENHORABUENA!!! 🎉</h3>
+    <p id="win-desc" style="margin:10px 0;">¡Has conseguido salir del laberinto!</p>
+    <p style="font-size:1.1em; color:#00f2fe; margin:10px 0;"><span id="win-key-label">Clave Certitude:</span><br><strong style="font-size:1.4em; color:#fff; text-shadow: 0 0 10px #00f2fe;">HAY-SALIDA</strong></p>
+    <button id="btn-close-text" class="btn-reset" style="margin-top:15px; width:100%; font-size:1em;" onclick="closeModal()">Cerrar y Rejugar</button>
   </div>
 </div>
 
 <script>
+  // Diccionario multilingüe
+  const translations = {
+    es: {
+      hud: "Mueve 1P hasta GC",
+      reset: "Reiniciar Posición",
+      winTitle: "🎉 ¡¡¡ENHORABUENA!!! 🎉",
+      winDesc: "¡Has conseguido salir del laberinto!",
+      keyLabel: "Clave Certitude:",
+      closeBtn: "Cerrar y Rejugar"
+    },
+    en: {
+      hud: "Move 1P to GC",
+      reset: "Reset Position",
+      winTitle: "🎉 CONGRATULATIONS! 🎉",
+      winDesc: "You made it out of the maze!",
+      keyLabel: "Certitude Keyword:",
+      closeBtn: "Close & Replay"
+    },
+    fr: {
+      hud: "Déplacez 1P vers GC",
+      reset: "Réinitialiser",
+      winTitle: "🎉 FÉLICITATIONS ! 🎉",
+      winDesc: "Vous êtes sorti du labyrinthe !",
+      keyLabel: "Mot-clé Certitude :",
+      closeBtn: "Fermer et Rejouer"
+    },
+    pt: {
+      hud: "Mova 1P até GC",
+      reset: "Reiniciar Posição",
+      winTitle: "🎉 PARABÉNS! 🎉",
+      winDesc: "Você conseguiu salir do labirinto!",
+      keyLabel: "Chave Certitude:",
+      closeBtn: "Fechar e Jogar Novamente"
+    },
+    de: {
+      hud: "Bewege 1P zu GC",
+      reset: "Position Zurücksetzen",
+      winTitle: "🎉 HERZLICHEN GLÜCKWUNSCH! 🎉",
+      winDesc: "Du hast den Weg aus dem Labyrinth gefunden!",
+      keyLabel: "Certitude-Schlüssel:",
+      closeBtn: "Schließen & Erneut Spielen"
+    },
+    it: {
+      hud: "Sposta 1P fino a GC",
+      reset: "Ricomincia Posizione",
+      winTitle: "🎉 CONGRATULAZIONI! 🎉",
+      winDesc: "Sei uscito dal labirinto!",
+      keyLabel: "Chiave Certitude:",
+      closeBtn: "Chiudi e Gioca Ancora"
+    }
+  };
+
+  let currentLang = 'es';
+
+  function setLanguage(lang) {
+    currentLang = lang;
+    const t = translations[lang];
+
+    // Actualizar textos
+    document.getElementById('hud-text').textContent = t.hud;
+    document.getElementById('btn-reset-text').textContent = t.reset;
+    document.getElementById('win-title').textContent = t.winTitle;
+    document.getElementById('win-desc').textContent = t.winDesc;
+    document.getElementById('win-key-label').textContent = t.keyLabel;
+    document.getElementById('btn-close-text').textContent = t.closeBtn;
+
+    // Resaltar bandera activa
+    const buttons = document.querySelectorAll('.flag-btn');
+    buttons.forEach((btn) => {
+      btn.classList.remove('active');
+      if (btn.getAttribute('onclick').includes(`'${lang}'`)) {
+        btn.classList.add('active');
+      }
+    });
+  }
+
+  function selectInitialLanguage(lang) {
+    setLanguage(lang);
+    document.getElementById('langModal').style.display = 'none';
+  }
+
   const canvas = document.getElementById('mazeCanvas');
   const ctx = canvas.getContext('2d');
 
@@ -388,6 +545,8 @@
     drawMap();
   }
 
+  // Inicializar juego y establecer idioma por defecto (ES)
+  setLanguage('es');
   initGame();
 </script>
 
