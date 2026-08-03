@@ -146,22 +146,27 @@
       transform: scale(0.96);
       box-shadow: 0 0 15px rgba(255, 179, 0, 0.8);
     }
-    /* Pie de página / Firma */
+    /* Pie de página / Firma reajustada y centrada */
     .footer-signature {
       display: flex;
-      justify-content: space-between;
+      justify-content: space-evenly;
       align-items: center;
-      margin-top: 8px;
+      margin: 8px auto 0 auto;
       padding-top: 6px;
       border-top: 1px solid rgba(76, 175, 80, 0.3);
       font-size: 0.8em;
+      max-width: 320px; /* Evita dispersión exagerada en pantallas anchas */
+      width: 100%;
     }
     .footer-signature a {
+      flex: 1;
+      text-align: center;
       color: #00f2fe;
       text-decoration: none;
       font-weight: bold;
       transition: all 0.2s;
       text-shadow: 0 0 5px rgba(0, 242, 254, 0.3);
+      white-space: nowrap;
     }
     .footer-signature a:hover,
     .footer-signature a:active {
@@ -253,7 +258,7 @@
 
     <button id="btn-reset-text" class="btn-reset" onclick="initGame()">Reiniciar Posición</button>
 
-    <!-- Firma a pie de página -->
+    <!-- Firma a pie de página reajustada al centro -->
     <div class="footer-signature">
       <a href="https://www.geocaching.com/plan/lists/BMFC2Z7" target="_blank" rel="noopener">GeoPaterna</a>
       <a href="https://www.geocaching.com/p/?guid=8aa34b6e-769c-42e2-ab66-4163f9a40e13&amp;wid=9b106a24-4eef-41ab-8a06-c207d4143cb1&amp;ds=2" target="_blank" rel="noopener">fran_giga</a>
