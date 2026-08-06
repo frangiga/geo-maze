@@ -1,244 +1,269 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Geo-Maze Vicente Mortes - fran_giga</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      overflow: hidden; /* Cero scroll absoluto */
-      background: #080d08;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      touch-action: manipulation;
-    }
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 5px;
-      background: radial-gradient(circle at center, #112211 0%, #050a05 100%);
-    }
-    #game-container {
-      width: 100%;
-      max-width: 420px;
-      height: 100vh;
-      height: 100dvh;
-      max-height: 700px;
-      background: linear-gradient(145deg, #182818, #0e1a0e);
-      padding: 10px;
-      border-radius: 14px;
-      border: 2px solid #388e3c;
-      box-shadow: 0 0 20px rgba(76, 175, 80, 0.25), inset 0 0 15px rgba(0, 0, 0, 0.6);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .game-title {
-      margin: 0 0 6px 0;
-      font-size: 1.25em;
-      font-weight: 900;
-      background: linear-gradient(90deg, #00f2fe, #4caf50, #ffd700);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
-      letter-spacing: 0.5px;
-    }
-    .hud {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 6px;
-      font-weight: bold;
-      background: rgba(10, 20, 10, 0.85);
-      padding: 6px 12px;
-      border-radius: 8px;
-      border: 1px solid rgba(76, 175, 80, 0.4);
-      color: #00f2fe;
-      font-size: 0.85em;
-      box-shadow: inset 0 0 8px rgba(0, 242, 254, 0.15);
-    }
-    /* Iconos de fichas para el HUD */
-    .token-icon {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      vertical-align: middle;
-    }
-    .token-player {
-      background: #00f2fe;
-      box-shadow: 0 0 6px #00f2fe;
-    }
-    .token-goal {
-      background: #ffd700;
-      box-shadow: 0 0 6px #ffd700;
-    }
-    .canvas-wrapper {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 0;
-      margin: 4px 0;
-    }
-    canvas {
-      background: #060e06;
-      border: 2px solid #00e676;
-      border-radius: 8px;
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      display: block;
-      box-shadow: 0 0 12px rgba(0, 230, 118, 0.3);
-    }
-    /* D-Pad para Táctil/Móviles */
-    .controls-dpad {
-      display: grid;
-      grid-template-columns: repeat(3, 50px);
-      grid-template-rows: repeat(3, 50px);
-      gap: 5px;
-      justify-content: center;
-      margin-top: 4px;
-    }
-    .btn-dir {
-      background: linear-gradient(145deg, #2e7d32, #1b5e20);
-      color: #fff;
-      border: 1px solid #4caf50;
-      font-size: 1.3em;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      user-select: none;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.2);
-      transition: all 0.1s ease;
-    }
-    .btn-dir:active {
-      background: linear-gradient(145deg, #00f2fe, #0099a8);
-      color: #000;
-      border-color: #00f2fe;
-      box-shadow: 0 0 12px #00f2fe, inset 0 2px 4px rgba(0,0,0,0.4);
-      transform: scale(0.95);
-    }
-    .btn-reset {
-      margin-top: 6px;
-      padding: 8px 16px;
-      background: linear-gradient(135deg, #ffb300, #ff8f00);
-      border: 1px solid #ffe082;
-      font-weight: bold;
-      border-radius: 8px;
-      cursor: pointer;
-      color: #000;
-      font-size: 0.85em;
-      box-shadow: 0 0 10px rgba(255, 179, 0, 0.4);
-      transition: all 0.2s ease;
-    }
-    .btn-reset:active {
-      transform: scale(0.96);
-      box-shadow: 0 0 15px rgba(255, 179, 0, 0.8);
-    }
-    /* Pie de página / Firma reajustada y centrada */
-    .footer-signature {
-      display: flex;
-      justify-content: space-evenly;
-      align-items: center;
-      margin: 8px auto 0 auto;
-      padding-top: 6px;
-      border-top: 1px solid rgba(76, 175, 80, 0.3);
-      font-size: 0.8em;
-      max-width: 320px; /* Evita dispersión exagerada en pantallas anchas */
-      width: 100%;
-    }
-    .footer-signature a {
-      flex: 1;
-      text-align: center;
-      color: #00f2fe;
-      text-decoration: none;
-      font-weight: bold;
-      transition: all 0.2s;
-      text-shadow: 0 0 5px rgba(0, 242, 254, 0.3);
-      white-space: nowrap;
-    }
-    .footer-signature a:hover,
-    .footer-signature a:active {
-      color: #ffd700;
-      text-shadow: 0 0 8px #ffd700;
-    }
-    /* Modal / Pop-ups */
-    .modal-overlay {
-      display: flex;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.88);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-    .modal-content {
-      background: linear-gradient(145deg, #1b3e1b, #0d240d);
-      border: 3px solid #ffd700;
-      border-radius: 14px;
-      padding: 22px;
-      max-width: 350px;
-      width: 100%;
-      box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), inset 0 0 15px rgba(255, 215, 0, 0.2);
-      animation: popIn 0.3s ease-out;
-    }
-    .lang-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 15px;
-    }
-    .lang-choice-btn {
-      background: linear-gradient(145deg, #2e7d32, #1b5e20);
-      color: #fff;
-      border: 1px solid #4caf50;
-      padding: 10px;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 0.95em;
-      transition: all 0.2s;
-    }
-    .lang-choice-btn:hover, .lang-choice-btn:active {
-      background: linear-gradient(145deg, #00f2fe, #0099a8);
-      color: #000;
-      border-color: #00f2fe;
-      box-shadow: 0 0 10px #00f2fe;
-    }
-    @keyframes popIn {
-      from { transform: scale(0.7); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-  </style>
+
+<!-- SI ESTÁS VIENDO ESTO PARA SOLUCIONAR EL MULTI, ERES UN MISERABLE QUE NO MERECE ESTE CACHÉ -->
+  
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Geo-Maze Vicente Mortes - fran_giga</title>
+<style>
+* {box-sizing: border-box;}
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #080d08;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  touch-action: manipulation;
+}
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  background: radial-gradient(circle at center, #112211 0%, #050a05 100%);
+}
+#game-container {
+  width: 100%;
+  max-width: 420px;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 700px;
+  background: linear-gradient(145deg, #182818, #0e1a0e);
+  padding: 10px;
+  border-radius: 14px;
+  border: 2px solid #388e3c;
+  box-shadow: 0 0 20px rgba(76, 175, 80, 0.25), inset 0 0 15px rgba(0, 0, 0, 0.6);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.game-title {
+  margin: 0 0 6px 0;
+  font-size: 1.25em;
+  font-weight: 900;
+  background: linear-gradient(90deg, #00f2fe, #4caf50, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+  letter-spacing: 0.5px;
+}
+.hud {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-weight: bold;
+  background: rgba(10, 20, 10, 0.85);
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  color: #00f2fe;
+  font-size: 0.85em;
+  box-shadow: inset 0 0 8px rgba(0, 242, 254, 0.15);
+}
+.token-icon {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+.token-player {
+  background: #00f2fe;
+  box-shadow: 0 0 6px #00f2fe;
+}
+.token-goal {
+  background: #ffd700;
+  box-shadow: 0 0 6px #ffd700;
+}
+.canvas-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  margin: 4px 0;
+}
+canvas {
+  background: #060e06;
+  border: 2px solid #00e676;
+  border-radius: 8px;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  box-shadow: 0 0 12px rgba(0, 230, 118, 0.3);
+}
+.controls-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 50px);
+  grid-template-rows: repeat(3, 50px);
+  gap: 5px;
+  justify-content: center;
+  margin-top: 4px;
+}
+.btn-dir {
+  background: linear-gradient(145deg, #2e7d32, #1b5e20);
+  color: #fff;
+  border: 1px solid #4caf50;
+  font-size: 1.3em;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.2);
+  transition: all 0.1s ease;
+}
+.btn-dir:active {
+  background: linear-gradient(145deg, #00f2fe, #0099a8);
+  color: #000;
+  border-color: #00f2fe;
+  box-shadow: 0 0 12px #00f2fe, inset 0 2px 4px rgba(0,0,0,0.4);
+  transform: scale(0.95);
+}
+.btn-reset {
+  margin-top: 6px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #ffb300, #ff8f00);
+  border: 1px solid #ffe082;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #000;
+  font-size: 0.85em;
+  box-shadow: 0 0 10px rgba(255, 179, 0, 0.4);
+  transition: all 0.2s ease;
+}
+.btn-reset:active {
+  transform: scale(0.96);
+  box-shadow: 0 0 15px rgba(255, 179, 0, 0.8);
+}
+.btn-action {
+  display: inline-block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+}
+.btn-copy {
+  background: linear-gradient(145deg, #00838f, #006064);
+  color: #fff;
+  border: 1px solid #00e5ff;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+}
+.btn-copy:active {
+  transform: scale(0.96);
+}
+.btn-certitude {
+  background: linear-gradient(145deg, #2e7d32, #1b5e20);
+  color: #fff;
+  border: 1px solid #4caf50;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+}
+.btn-certitude:active {
+  transform: scale(0.96);
+}
+.footer-signature {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  margin: 8px auto 0 auto;
+  padding-top: 6px;
+  border-top: 1px solid rgba(76, 175, 80, 0.3);
+  font-size: 0.8em;
+  max-width: 320px;
+  width: 100%;
+}
+.footer-signature a {
+  flex: 1;
+  text-align: center;
+  color: #00f2fe;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.2s;
+  text-shadow: 0 0 5px rgba(0, 242, 254, 0.3);
+  white-space: nowrap;
+}
+.footer-signature a:hover,
+.footer-signature a:active {
+  color: #ffd700;
+  text-shadow: 0 0 8px #ffd700;
+}
+.modal-overlay {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+.modal-content {
+  background: linear-gradient(145deg, #1b3e1b, #0d240d);
+  border: 3px solid #ffd700;
+  border-radius: 14px;
+  padding: 20px;
+  max-width: 350px;
+  width: 100%;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), inset 0 0 15px rgba(255, 215, 0, 0.2);
+  animation: popIn 0.3s ease-out;
+}
+.lang-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 15px;
+}
+.lang-choice-btn {
+  background: linear-gradient(145deg, #2e7d32, #1b5e20);
+  color: #fff;
+  border: 1px solid #4caf50;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.95em;
+  transition: all 0.2s;
+}
+.lang-choice-btn:hover, .lang-choice-btn:active {
+  background: linear-gradient(145deg, #00f2fe, #0099a8);
+  color: #000;
+  border-color: #00f2fe;
+  box-shadow: 0 0 10px #00f2fe;
+}
+@keyframes popIn {
+  from { transform: scale(0.7); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+</style>
 </head>
 <body>
 
 <div id="game-container">
   <div>
     <h2 class="game-title">🧭 Geo-Maze Vicente Mortes 🧭</h2>
-    <div class="hud" id="hud-container">
-      <!-- El texto del HUD se genera dinámicamente con iconos de color -->
-    </div>
+    <div class="hud" id="hud-container"></div>
   </div>
 
   <div class="canvas-wrapper">
@@ -246,7 +271,6 @@
   </div>
 
   <div>
-    <!-- D-Pad para Móvil -->
     <div class="controls-dpad">
       <div></div>
       <button class="btn-dir" onclick="movePlayer('up')">▲</button>
@@ -255,13 +279,12 @@
       <button class="btn-dir" onclick="movePlayer('down')">▼</button>
       <button class="btn-dir" onclick="movePlayer('right')">►</button>
     </div>
-
+    
     <button id="btn-reset-text" class="btn-reset" onclick="initGame()">Reiniciar Posición</button>
 
-    <!-- Firma a pie de página reajustada al centro -->
     <div class="footer-signature">
       <a href="https://www.geocaching.com/plan/lists/BMFC2Z7" target="_blank" rel="noopener">GeoPaterna</a>
-      <a href="https://www.geocaching.com/p/?guid=8aa34b6e-769c-42e2-ab66-4163f9a40e13&amp;wid=9b106a24-4eef-41ab-8a06-c207d4143cb1&amp;ds=2" target="_blank" rel="noopener">fran_giga</a>
+      <a href="https://www.geocaching.com/p/?guid=8aa34b6e-769c-42e2-ab66-4163f9a40e13&wid=9b106a24-4eef-41ab-8a06-c207d4143cb1&ds=2" target="_blank" rel="noopener">fran_giga</a>
     </div>
   </div>
 </div>
@@ -286,247 +309,273 @@
 <div id="rewardModal" class="modal-overlay" style="display:none;">
   <div class="modal-content">
     <h3 id="win-title" style="color:#ffd700; margin-top:0; font-size: 1.4em; text-shadow: 0 0 10px rgba(255,215,0,0.5);">🎉 ¡¡¡ENHORABUENA!!! 🎉</h3>
-    <p id="win-desc" style="margin:10px 0;">¡Has conseguido salir del laberinto!</p>
-    <p style="font-size:1.1em; color:#00f2fe; margin:10px 0;"><span id="win-key-label">Clave Certitude:</span><br><strong style="font-size:1.4em; color:#fff; text-shadow: 0 0 10px #00f2fe;">HAY-SALIDA</strong></p>
-    <button id="btn-close-text" class="btn-reset" style="margin-top:15px; width:100%; font-size:1em;" onclick="closeModal()">Cerrar y Rejugar</button>
+    <p id="win-desc" style="margin:6px 0;">¡Has conseguido salir del laberinto!</p>
+    
+    <p style="font-size:1em; color:#00f2fe; margin:8px 0 4px 0;">
+      <span id="win-key-label">Clave Certitude:</span><br>
+      <strong id="secret-key" style="font-size:1.4em; color:#fff; text-shadow: 0 0 10px #00f2fe;">HAY-SALIDA</strong>
+    </p>
+
+    <!-- Botón para copiar clave -->
+    <button id="btn-copy-key" class="btn-action btn-copy" onclick="copyKey()">📋 Copiar Clave</button>
+
+    <!-- Botón de enlace a Certitude -->
+    <a href="https://www.certitudes.org/certitude?wp=GCBVH23" target="_blank" rel="noopener" class="btn-action btn-certitude" id="btn-certitude-text">
+      🔗 IR AL CERTITUDE
+    </a>
+
+    <!-- Botón de reintento -->
+    <button id="btn-close-text" class="btn-reset" style="margin-top:10px; width:100%; font-size:0.9em;" onclick="closeModal()">Cerrar y Rejugar</button>
   </div>
 </div>
 
 <script>
-  // Diccionario multilingüe con estructura para fichas coloreadas
-  const translations = {
-    es: {
-      moveText: "Mueve",
-      toText: "hasta",
-      reset: "Reiniciar Posición",
-      winTitle: "🎉 ¡¡¡ENHORABUENA!!! 🎉",
-      winDesc: "¡Has conseguido salir del laberinto!",
-      keyLabel: "Clave Certitude:",
-      closeBtn: "Cerrar y Rejugar"
-    },
-    en: {
-      moveText: "Move",
-      toText: "to",
-      reset: "Reset Position",
-      winTitle: "🎉 CONGRATULATIONS! 🎉",
-      winDesc: "You made it out of the maze!",
-      keyLabel: "Certitude Keyword:",
-      closeBtn: "Close & Replay"
-    },
-    fr: {
-      moveText: "Déplacez",
-      toText: "vers",
-      reset: "Réinitialiser",
-      winTitle: "🎉 FÉLICITATIONS ! 🎉",
-      winDesc: "Vous êtes sorti du labyrinthe !",
-      keyLabel: "Mot-clé Certitude :",
-      closeBtn: "Fermer et Rejouer"
-    },
-    pt: {
-      moveText: "Mova",
-      toText: "até",
-      reset: "Reiniciar Posição",
-      winTitle: "🎉 PARABÉNS! 🎉",
-      winDesc: "Você conseguiu sair do labirinto!",
-      keyLabel: "Chave Certitude:",
-      closeBtn: "Fechar e Jogar Novamente"
-    },
-    de: {
-      moveText: "Bewege",
-      toText: "zu",
-      reset: "Position Zurücksetzen",
-      winTitle: "🎉 HERZLICHEN GLÜCKWUNSCH! 🎉",
-      winDesc: "Du hast den Weg aus dem Labyrinth gefunden!",
-      keyLabel: "Certitude-Schlüssel:",
-      closeBtn: "Schließen & Erneut Spielen"
-    },
-    it: {
-      moveText: "Sposta",
-      toText: "fino a",
-      reset: "Ricomincia Posizione",
-      winTitle: "🎉 CONGRATULAZIONI! 🎉",
-      winDesc: "Sei uscito dal labirinto!",
-      keyLabel: "Chiave Certitude:",
-      closeBtn: "Chiudi e Gioca Ancora"
-    }
-  };
-
-  let currentLang = 'es';
-
-  function setLanguage(lang) {
-    currentLang = lang;
-    const t = translations[lang];
-
-    // Construir el HUD dinámicamente con los iconos de fichas
-    const hudContainer = document.getElementById('hud-container');
-    hudContainer.innerHTML = `${t.moveText} <span class="token-icon token-player"></span> ${t.toText} <span class="token-icon token-goal"></span>`;
-
-    // Actualizar textos restantes
-    document.getElementById('btn-reset-text').textContent = t.reset;
-    document.getElementById('win-title').textContent = t.winTitle;
-    document.getElementById('win-desc').textContent = t.winDesc;
-    document.getElementById('win-key-label').textContent = t.keyLabel;
-    document.getElementById('btn-close-text').textContent = t.closeBtn;
+const translations = {
+  es: {
+    moveText: "Mueve",
+    toText: "hasta",
+    reset: "Reiniciar Posición",
+    winTitle: "🎉 ¡¡¡ENHORABUENA!!! 🎉",
+    winDesc: "¡Has conseguido salir del laberinto!",
+    keyLabel: "Clave Certitude:",
+    copyBtn: "📋 Copiar Clave",
+    copiedText: "✓ ¡Clave Copiada!",
+    certitudeBtn: "🔗 IR AL CERTITUDE",
+    closeBtn: "Cerrar y Rejugar"
+  },
+  en: {
+    moveText: "Move",
+    toText: "to",
+    reset: "Reset Position",
+    winTitle: "🎉 CONGRATULATIONS! 🎉",
+    winDesc: "You made it out of the maze!",
+    keyLabel: "Certitude Keyword:",
+    copyBtn: "📋 Copy Keyword",
+    copiedText: "✓ Copied!",
+    certitudeBtn: "🔗 GO TO CERTITUDE",
+    closeBtn: "Close & Replay"
+  },
+  fr: {
+    moveText: "Déplacez",
+    toText: "vers",
+    reset: "Réinitialiser",
+    winTitle: "🎉 FÉLICITATIONS ! 🎉",
+    winDesc: "Vous êtes sorti du labyrinthe !",
+    keyLabel: "Mot-clé Certitude :",
+    copyBtn: "📋 Copier el mot-clé",
+    copiedText: "✓ Copié !",
+    certitudeBtn: "🔗 ALLER À CERTITUDE",
+    closeBtn: "Fermer et Rejouer"
+  },
+  pt: {
+    moveText: "Mova",
+    toText: "até",
+    reset: "Reiniciar Posição",
+    winTitle: "🎉 PARABÉNS! 🎉",
+    winDesc: "Você conseguiu sair do labirinto!",
+    keyLabel: "Chave Certitude:",
+    copyBtn: "📋 Copiar Chave",
+    copiedText: "✓ Copiado!",
+    certitudeBtn: "🔗 IR PARA O CERTITUDE",
+    closeBtn: "Fechar e Jogar Novamente"
+  },
+  de: {
+    moveText: "Bewege",
+    toText: "zu",
+    reset: "Position Zurücksetzen",
+    winTitle: "🎉 HERZLICHEN GLÜCKWUNSCH! 🎉",
+    winDesc: "Du hast den Weg aus dem Labyrinth gefunden!",
+    keyLabel: "Certitude-Schlüssel:",
+    copyBtn: "📋 Schlüssel Kopieren",
+    copiedText: "✓ Kopiert!",
+    certitudeBtn: "🔗 ZU CERTITUDE",
+    closeBtn: "Schließen & Erneut Spielen"
+  },
+  it: {
+    moveText: "Sposta",
+    toText: "fino a",
+    reset: "Ricomincia Posizione",
+    winTitle: "🎉 CONGRATULAZIONI! 🎉",
+    winDesc: "Sei uscito dal labirinto!",
+    keyLabel: "Chiave Certitude:",
+    copyBtn: "📋 Copia Chiave",
+    copiedText: "✓ Copiato!",
+    certitudeBtn: "🔗 VAI A CERTITUDE",
+    closeBtn: "Chiudi e Gioca Ancora"
   }
+};
 
-  function selectInitialLanguage(lang) {
-    setLanguage(lang);
-    document.getElementById('langModal').style.display = 'none';
-  }
+let currentLang = 'es';
 
-  const canvas = document.getElementById('mazeCanvas');
-  const ctx = canvas.getContext('2d');
+function setLanguage(lang) {
+  currentLang = lang;
+  const t = translations[lang];
 
-  // Rejilla de 45x45 casillas
-  const cols = 45;
-  const rows = 45;
-  const cellSize = canvas.width / cols;
+  const hudContainer = document.getElementById('hud-container');
+  hudContainer.innerHTML = `${t.moveText} <span class="token-icon token-player"></span> ${t.toText} <span class="token-icon token-goal"></span>`;
 
-  let grid = [];
-  let player = { x: 0, y: 0 };
-  let goal = { x: cols - 1, y: rows - 1 };
-  let gameActive = true;
+  document.getElementById('btn-reset-text').textContent = t.reset;
+  document.getElementById('win-title').textContent = t.winTitle;
+  document.getElementById('win-desc').textContent = t.winDesc;
+  document.getElementById('win-key-label').textContent = t.keyLabel;
+  document.getElementById('btn-copy-key').textContent = t.copyBtn;
+  document.getElementById('btn-certitude-text').textContent = t.certitudeBtn;
+  document.getElementById('btn-close-text').textContent = t.closeBtn;
+}
 
-  // Generador de laberinto perfecto (DFS) con semilla fija
-  function generateMaze() {
-    grid = Array.from({ length: rows }, () => Array(cols).fill(1));
+function selectInitialLanguage(lang) {
+  setLanguage(lang);
+  document.getElementById('langModal').style.display = 'none';
+}
 
-    let seed = 98765;
-    function pseudoRandom() {
-      seed = (seed * 9301 + 49297) % 233280;
-      return seed / 233280;
-    }
-
-    let stack = [];
-    let startCell = { x: 0, y: 0 };
-    grid[0][0] = 0;
-    stack.push(startCell);
-
-    while (stack.length > 0) {
-      let current = stack[stack.length - 1];
-      let neighbors = [];
-
-      let directions = [
-        { dx: 0, dy: -2 }, // Arriba
-        { dx: 0, dy: 2 },  // Abajo
-        { dx: -2, dy: 0 }, // Izquierda
-        { dx: 2, dy: 0 }   // Derecha
-      ];
-
-      for (let dir of directions) {
-        let nx = current.x + dir.dx;
-        let ny = current.y + dir.dy;
-
-        if (nx >= 0 && nx < cols && ny >= 0 && ny < rows && grid[ny][nx] === 1) {
-          neighbors.push({ x: nx, y: ny, dir });
-        }
-      }
-
-      if (neighbors.length > 0) {
-        let chosenIndex = Math.floor(pseudoRandom() * neighbors.length);
-        let chosen = neighbors[chosenIndex];
-
-        grid[current.y + chosen.dir.dy / 2][current.x + chosen.dir.dx / 2] = 0;
-        grid[chosen.y][chosen.x] = 0;
-
-        stack.push({ x: chosen.x, y: chosen.y });
-      } else {
-        stack.pop();
-      }
-    }
-
-    // Apertura asegurada en la salida
-    grid[rows - 1][cols - 1] = 0;
-    grid[rows - 1][cols - 2] = 0;
-  }
-
-  function drawMap() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (grid[r][c] === 1) {
-          ctx.fillStyle = '#1b4d1e'; // Muro verde bosque profundo
-          ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
-        } else {
-          ctx.strokeStyle = '#0d220e'; // Pasillo oscuro
-          ctx.strokeRect(c * cellSize, r * cellSize, cellSize, cellSize);
-        }
-      }
-    }
-
-    // Meta (Ficha dorada limpia sin texto)
-    const goalCenterX = (goal.x + 0.5) * cellSize;
-    const goalCenterY = (goal.y + 0.5) * cellSize;
-
-    ctx.fillStyle = '#ffd700';
-    ctx.beginPath();
-    ctx.arc(goalCenterX, goalCenterY, cellSize / 2.2, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Jugador (Ficha cian neón limpia sin texto)
-    const playerCenterX = (player.x + 0.5) * cellSize;
-    const playerCenterY = (player.y + 0.5) * cellSize;
-
-    ctx.fillStyle = '#00f2fe';
-    ctx.beginPath();
-    ctx.arc(playerCenterX, playerCenterY, cellSize / 2.2, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  function movePlayer(dir) {
-    if (!gameActive) return;
-
-    let newX = player.x;
-    let newY = player.y;
-
-    if (dir === 'up') newY--;
-    if (dir === 'down') newY++;
-    if (dir === 'left') newX--;
-    if (dir === 'right') newX++;
-
-    if (newX >= 0 && newX < cols && newY >= 0 && newY < rows) {
-      if (grid[newY][newX] === 0) {
-        player.x = newX;
-        player.y = newY;
-        drawMap();
-        checkWin();
-      }
-    }
-  }
-
-  // Teclado PC
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowUp') movePlayer('up');
-    if (e.key === 'ArrowDown') movePlayer('down');
-    if (e.key === 'ArrowLeft') movePlayer('left');
-    if (e.key === 'ArrowRight') movePlayer('right');
+function copyKey() {
+  const keyText = document.getElementById('secret-key').innerText;
+  navigator.clipboard.writeText(keyText).then(() => {
+    const btn = document.getElementById('btn-copy-key');
+    btn.textContent = translations[currentLang].copiedText;
+    setTimeout(() => {
+      btn.textContent = translations[currentLang].copyBtn;
+    }, 2000);
   });
+}
 
-  function checkWin() {
-    if (player.x === goal.x && player.y === goal.y) {
-      gameActive = false;
-      document.getElementById('rewardModal').style.display = 'flex';
+const canvas = document.getElementById('mazeCanvas');
+const ctx = canvas.getContext('2d');
+
+const cols = 45;
+const rows = 45;
+const cellSize = canvas.width / cols;
+
+let grid = [];
+let player = { x: 0, y: 0 };
+let goal = { x: cols - 1, y: rows - 1 };
+let gameActive = true;
+
+function generateMaze() {
+  grid = Array.from({ length: rows }, () => Array(cols).fill(1));
+  let seed = 98765;
+
+  function pseudoRandom() {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  }
+
+  let stack = [];
+  let startCell = { x: 0, y: 0 };
+  grid[0][0] = 0;
+  stack.push(startCell);
+
+  while (stack.length > 0) {
+    let current = stack[stack.length - 1];
+    let neighbors = [];
+    let directions = [
+      { dx: 0, dy: -2 },
+      { dx: 0, dy: 2 },
+      { dx: -2, dy: 0 },
+      { dx: 2, dy: 0 }
+    ];
+
+    for (let dir of directions) {
+      let nx = current.x + dir.dx;
+      let ny = current.y + dir.dy;
+      if (nx >= 0 && nx < cols && ny >= 0 && ny < rows && grid[ny][nx] === 1) {
+        neighbors.push({ x: nx, y: ny, dir });
+      }
+    }
+
+    if (neighbors.length > 0) {
+      let chosenIndex = Math.floor(pseudoRandom() * neighbors.length);
+      let chosen = neighbors[chosenIndex];
+      grid[current.y + chosen.dir.dy / 2][current.x + chosen.dir.dx / 2] = 0;
+      grid[chosen.y][chosen.x] = 0;
+      stack.push({ x: chosen.x, y: chosen.y });
+    } else {
+      stack.pop();
     }
   }
 
-  function closeModal() {
-    document.getElementById('rewardModal').style.display = 'none';
-    initGame();
+  grid[rows - 1][cols - 1] = 0;
+  grid[rows - 1][cols - 2] = 0;
+}
+
+function drawMap() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (grid[r][c] === 1) {
+        ctx.fillStyle = '#1b4d1e';
+        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+      } else {
+        ctx.strokeStyle = '#0d220e';
+        ctx.strokeRect(c * cellSize, r * cellSize, cellSize, cellSize);
+      }
+    }
   }
 
-  function initGame() {
-    generateMaze();
-    player = { x: 0, y: 0 };
-    gameActive = true;
-    document.getElementById('rewardModal').style.display = 'none';
-    drawMap();
-  }
+  const goalCenterX = (goal.x + 0.5) * cellSize;
+  const goalCenterY = (goal.y + 0.5) * cellSize;
+  ctx.fillStyle = '#ffd700';
+  ctx.beginPath();
+  ctx.arc(goalCenterX, goalCenterY, cellSize / 2.2, 0, Math.PI * 2);
+  ctx.fill();
 
-  // Inicializar juego y establecer idioma por defecto (ES)
-  setLanguage('es');
+  const playerCenterX = (player.x + 0.5) * cellSize;
+  const playerCenterY = (player.y + 0.5) * cellSize;
+  ctx.fillStyle = '#00f2fe';
+  ctx.beginPath();
+  ctx.arc(playerCenterX, playerCenterY, cellSize / 2.2, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function movePlayer(dir) {
+  if (!gameActive) return;
+  let newX = player.x;
+  let newY = player.y;
+
+  if (dir === 'up') newY--;
+  if (dir === 'down') newY++;
+  if (dir === 'left') newX--;
+  if (dir === 'right') newX++;
+
+  if (newX >= 0 && newX < cols && newY >= 0 && newY < rows) {
+    if (grid[newY][newX] === 0) {
+      player.x = newX;
+      player.y = newY;
+      drawMap();
+      checkWin();
+    }
+  }
+}
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowUp') movePlayer('up');
+  if (e.key === 'ArrowDown') movePlayer('down');
+  if (e.key === 'ArrowLeft') movePlayer('left');
+  if (e.key === 'ArrowRight') movePlayer('right');
+});
+
+function checkWin() {
+  if (player.x === goal.x && player.y === goal.y) {
+    gameActive = false;
+    document.getElementById('rewardModal').style.display = 'flex';
+  }
+}
+
+function closeModal() {
+  document.getElementById('rewardModal').style.display = 'none';
   initGame();
-</script>
+}
 
+function initGame() {
+  generateMaze();
+  player = { x: 0, y: 0 };
+  gameActive = true;
+  document.getElementById('rewardModal').style.display = 'none';
+  drawMap();
+}
+
+setLanguage('es');
+initGame();
+</script>
 </body>
 </html>
